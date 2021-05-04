@@ -495,7 +495,7 @@ class KnobScripter(QtWidgets.QDialog):
                 else:
                     i_full = i
 
-                if i in self.unsavedKnobs.keys():
+                if i in list(self.unsavedKnobs.keys()):
                     self.current_knob_dropdown.addItem(i_full+"(*)", i)
                 else:
                     self.current_knob_dropdown.addItem(i_full, i)
@@ -508,7 +508,7 @@ class KnobScripter(QtWidgets.QDialog):
             counter += 1
         for i in self.node.knobs():
             if i in self.defaultKnobs:
-                if i in self.unsavedKnobs.keys():
+                if i in list(self.unsavedKnobs.keys()):
                     self.current_knob_dropdown.addItem(i+"(*)", i)
                 else:
                     self.current_knob_dropdown.addItem(i, i)
@@ -686,7 +686,7 @@ class KnobScripter(QtWidgets.QDialog):
         knobs_dropdown = self.current_knob_dropdown
         all_knobs = [knobs_dropdown.itemData(i) for i in range(knobs_dropdown.count())]
         for key in all_knobs:
-            if key in self.unsavedKnobs.keys():
+            if key in list(self.unsavedKnobs.keys()):
                 self.setKnobModified(modified = True, knob = key, changeTitle = False)
             else:
                 self.setKnobModified(modified = False, knob = key, changeTitle = False)
@@ -747,7 +747,7 @@ class KnobScripter(QtWidgets.QDialog):
             self.current_folder_dropdown.addItem(fname+"/", fname)
             counter += 1
 
-        #print scriptFolders
+        #print(scriptFolders)
         if counter > 0:
             self.current_folder_dropdown.insertSeparator(counter)
             counter += 1
@@ -828,7 +828,7 @@ class KnobScripter(QtWidgets.QDialog):
                 os.makedirs(folder_path)
                 return True
             except:
-                print "Couldn't create the scripting folders.\nPlease check your OS write permissions."
+                print("Couldn't create the scripting folders.\nPlease check your OS write permissions.")
                 return False
 
     def makeScriptFile(self, name = "Untitled.py", folder = "scripts", empty = True):
@@ -838,7 +838,7 @@ class KnobScripter(QtWidgets.QDialog):
                 self.current_script_file = open(script_path, 'w')
                 return True
             except:
-                print "Couldn't create the scripting folders.\nPlease check your OS write permissions."
+                print("Couldn't create the scripting folders.\nPlease check your OS write permissions.")
                 return False
 
     def setCurrentFolder(self, folderName):
@@ -1347,7 +1347,7 @@ class KnobScripter(QtWidgets.QDialog):
     def changeClicked(self, newNode=""):
         ''' Change node '''
         try:
-            print "Changing from " + self.node.name()
+            print("Changing from " + self.node.name())
         except:
             self.node = None
             if not len(nuke.selectedNodes()):
@@ -1723,8 +1723,12 @@ def remove_comments_and_docstrings(source):
     """
     Returns 'source' minus comments and docstrings.
     """
-    import cStringIO, tokenize
-    io_obj = cStringIO.StringIO(source)
+    import tokenize
+    if sys.version_info.major < 3:
+        import cStringIO as io
+    else:
+        import io
+    io_obj = io.StringIO(source)
     out = ""
     prev_toktype = tokenize.INDENT
     last_lineno = -1
@@ -2765,7 +2769,7 @@ class ScriptOutputWidget(QtWidgets.QTextEdit) :
         shift = ((event.modifiers() and (Qt.ShiftModifier)) != 0)
         key = event.key()
         if type(event) == QtGui.QKeyEvent:
-            #print event.key()
+            #print(event.key())
             if key in [32]: # Space
                 return KnobScripter.keyPressEvent(self.knobScripter, event)
             elif key in [Qt.Key_Backspace, Qt.Key_Delete]:
@@ -2904,7 +2908,7 @@ class KnobScripterTextEditMain(KnobScripterTextEdit):
                 if not self.currentNukeCompletion:
                     self.nukeCompleter.setCurrentRow(0)
                     self.currentNukeCompletion = self.nukeCompleter.currentCompletion()
-                #print str(self.nukeCompleter.completionModel[0])
+                #print(str(self.nukeCompleter.completionModel[0]))
                 self.insertNukeCompletion(self.currentNukeCompletion)
                 self.nukeCompleter.popup().hide()
                 self.nukeCompleterShowing = False
@@ -3072,9 +3076,9 @@ class KnobScripterTextEditMain(KnobScripterTextEdit):
                 return matching
             else:
                 try:
-                    if sys.modules.has_key(searchString) :
+                    if searchString in sys.modules:
                         return dir(sys.modules['%s' % searchString])
-                    elif globals().has_key(searchString): 
+                    elif searchString in globals(): 
                         return dir(globals()['%s' % searchString])
                     else:
                         return []
